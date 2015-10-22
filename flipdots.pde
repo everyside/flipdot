@@ -83,8 +83,8 @@ void drawToDevice(){
 
 void processOutputPixel(Capture c, int x, int y){
   
-  int mappedX = int((x/currentFrame.width) * inputVideoSize.x);
-  int mappedY = int((y/currentFrame.height) * inputVideoSize.y);
+  int mappedX = int(((float)x/currentFrame.width) * inputVideoSize.x);
+  int mappedY = int(((float)y/currentFrame.height) * inputVideoSize.y);
   
   int val = int(brightness(c.get(mappedX,mappedY)));
   
