@@ -8,14 +8,18 @@ static final PVector simulatorPixelSize = new PVector(20, 20);
 static final PVector simulatorPixelPadding = new PVector(2,2);
 static final int numberOfGreys = 8;
 
-final PImage currentFrame = createImage(28, 7, ALPHA);
+static final int frameWidth = 28;
+static final int frameHeight = 7;
+
+final PImage frame1 = createImage(frameWidth, frameHeight, ALPHA);
+final PImage frame2 = createImage(frameWidth, frameHeight, ALPHA);
  
 boolean dirty = true;
 Capture video;
 
 void setup() {
   //this call cannot use variables, but should be set to simulatorPixelSize * currentFrame.size
-  size(560, 140);
+  size(560, 280);
   
   //Set color ranages
   colorMode(HSB,360,100,100,100);
@@ -47,12 +51,13 @@ void draw() {
 void drawToSimualtor(){
   clearSimulator();
   //loop through columns.
-  for(int col=0;col<currentFrame.width;col++){
+  for(int col=0;col<frameWidth;col++){
     //loop through items in column
     pushMatrix();
-    for(int row=0;row<currentFrame.height;row++){
+    for(int row=0;row<frameHeight * 2;row++){
       //Get the color of the pixel
-      int val = currentFrame.pixels[(row * currentFrame.width)+col];
+      PImage f = row < frameHeight ? frame1 : frame2;
+      int val = f.pixels[(row * frameWidth)+col];
       //System.out.println(val);
       fill(360,0,100,val);
       
@@ -83,15 +88,15 @@ void drawToDevice(){
 
 void processOutputPixel(Capture c, int x, int y){
   
-  int mappedX = int(((float)x/currentFrame.width) * inputVideoSize.x);
-  int mappedY = int(((float)y/currentFrame.height) * inputVideoSize.y);
+  int mappedX = int(((float)x/frameWidth) * inputVideoSize.x);
+  int mappedY = int(((float)y/frameHeight * 2) * inputVideoSize.y);
   
   int val = int(brightness(c.get(mappedX,mappedY)));
   
   val = (int(val / numberOfGreys)) * numberOfGreys;
   
-  
-  currentFrame.set(x,y,val);
+  PImage f = y < frameHeight ? frame1 : frame2;
+  f.set(x,y,val);
 }
 
 void captureEvent(Capture c) {
@@ -101,9 +106,9 @@ void captureEvent(Capture c) {
     c.loadPixels();
    
     //loop through columns.
-    for(int col=0;col<currentFrame.width;col++){
+    for(int col=0;col<frameWidth;col++){
       //loop through items in column
-      for(int row=0;row<currentFrame.height;row++){
+      for(int row=0;row<frameHeight * 2;row++){
         //Transmongel the color of the output pixel from the input
         processOutputPixel(c,col,row);
       }
