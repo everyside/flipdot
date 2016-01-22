@@ -1,7 +1,25 @@
-import processing.video.*;
+import processing.core.*; 
+import processing.data.*; 
+import processing.event.*; 
+import processing.opengl.*; 
 
-color black = color(0);
-color white = color(255);
+import processing.video.*; 
+
+import java.util.HashMap; 
+import java.util.ArrayList; 
+import java.io.File; 
+import java.io.BufferedReader; 
+import java.io.PrintWriter; 
+import java.io.InputStream; 
+import java.io.OutputStream; 
+import java.io.IOException; 
+
+public class flipdots extends PApplet {
+
+
+
+int black = color(0);
+int white = color(255);
 
 static final PVector inputVideoSize = new PVector(320, 240);
 static final PVector simulatorPixelSize = new PVector(8, 8);
@@ -16,9 +34,9 @@ final PImage frame = createImage(frameWidth, frameHeight, ALPHA);
 boolean dirty = true;
 Capture video;
 
-void setup() {
+public void setup() {
   //this call cannot use variables, but should be set to simulatorPixelSize * currentFrame.size
-  size(896, 448);
+  
 
   frameRate(2);
 
@@ -33,16 +51,16 @@ void setup() {
 
 
   noCursor();
-  smooth();
+  
 }
 
-void startCamera() {
+public void startCamera() {
   // Start capturing images from the camera
-  video = new Capture(this, int(inputVideoSize.x), int(inputVideoSize.y));
+  video = new Capture(this, PApplet.parseInt(inputVideoSize.x), PApplet.parseInt(inputVideoSize.y));
   video.start();
 }
 
-void draw() {
+public void draw() {
   if (dirty) {
     drawToSimualtor();
     drawToDevice();
@@ -50,7 +68,7 @@ void draw() {
   }
 }
 
-void drawToSimualtor() {
+public void drawToSimualtor() {
   clearSimulator();
   //loop through columns.
   for (int col=0; col<frameWidth; col++) {
@@ -77,11 +95,11 @@ void drawToSimualtor() {
   }
 }
 
-void clearSimulator() {
+public void clearSimulator() {
   clear();
 }
 
-void drawToDevice() {
+public void drawToDevice() {
   //TODO - send the current frame data to a device
 
   StringBuilder sb = new StringBuilder();
@@ -99,18 +117,18 @@ void drawToDevice() {
   System.out.println(sb.toString());
 }
 
-void processOutputPixel(Capture c, int x, int y) {
+public void processOutputPixel(Capture c, int x, int y) {
 
-  int mappedX = int(((float)x/frameWidth) * inputVideoSize.x);
-  int mappedY = int(((float)y/frameHeight) * inputVideoSize.y);
+  int mappedX = PApplet.parseInt(((float)x/frameWidth) * inputVideoSize.x);
+  int mappedY = PApplet.parseInt(((float)y/frameHeight) * inputVideoSize.y);
 
-  int val = int(brightness(c.get(mappedX, mappedY)));
+  int val = PApplet.parseInt(brightness(c.get(mappedX, mappedY)));
   val = val > 70 ? 100:0;
 
   frame.set(x, y, val);
 }
 
-void captureEvent(Capture c) {
+public void captureEvent(Capture c) {
   c.read();
   if (!dirty) {
     dirty = true;
@@ -123,6 +141,16 @@ void captureEvent(Capture c) {
         //Transmongel the color of the output pixel from the input
         processOutputPixel(c, col, row);
       }
+    }
+  }
+}
+  public void settings() {  size(896, 448);  smooth(); }
+  static public void main(String[] passedArgs) {
+    String[] appletArgs = new String[] { "--present", "--window-color=#666666", "--hide-stop", "flipdots" };
+    if (passedArgs != null) {
+      PApplet.main(concat(appletArgs, passedArgs));
+    } else {
+      PApplet.main(appletArgs);
     }
   }
 }
