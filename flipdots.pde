@@ -61,8 +61,8 @@ void setup() {
   strokeWeight(0);
   ellipseMode(CORNER);
 
-  thread("startCamera");
-
+  //thread("startCamera");
+  thread("startWatchingFileSystem");
 
   noCursor();
   smooth();
@@ -73,7 +73,7 @@ void setup() {
 void startWatchingFileSystem(){
   try{
     WatchService watcher = FileSystems.getDefault().newWatchService();
-    Path dir = Paths.get("images/");
+    Path dir = Paths.get("/tmp");
     dir.register(watcher, ENTRY_CREATE);
     
     while (true) {
@@ -96,12 +96,15 @@ void startWatchingFileSystem(){
      
             System.out.println(kind.name() + ": " + fileName);
      
-            if (kind == OVERFLOW) {
-                continue;
-            } else if (kind == ENTRY_CREATE) {
+            if (kind == ENTRY_CREATE) {
      
                 // process create event
-     
+                if(!dirty){
+                  PImage img = loadImage(dir.toString() + "/"+fileName.toString());
+                  log(dir.toString() + "/"+ fileName.toString());
+                  processImage(img);
+                  dirty = true;
+                }
             } else if (kind == ENTRY_DELETE) {
      
                 // process delete event
