@@ -52,6 +52,8 @@ void setup() {
   //this call cannot use variables, but should be set to simulatorPixelSize * currentFrame.size
   size(896, 448);
   
+  setupBalls();
+  
   frameRate(10);
 
   //Set color ranages
@@ -62,7 +64,7 @@ void setup() {
   ellipseMode(CORNER);
 
   //thread("startCamera");
-  thread("startWatchingFileSystem");
+  //thread("startWatchingFileSystem");
 
   noCursor();
   smooth();
@@ -134,8 +136,13 @@ void startWatchingFileSystem(){
 }
 */
 void draw() {
+  
+  drawBalls();
+  processImage(get());
+  dirty = true;
+  
   if (dirty) {
-    drawToSimulator();
+    //drawToSimulator();
     drawToDevice();
     dirty = false;
   }
@@ -356,3 +363,95 @@ boolean isOn(PImage img, int x, int y){
     processImage(c);
   }
 }*/
+
+
+
+
+//bouncing balls 
+
+int numBalls = 20;
+float spring = 2.15;
+float gravity = 1.06;
+float friction = -0.3;
+Ball[] balls = new Ball[numBalls];
+
+void setupBalls() {
+  for (int i = 0; i < numBalls; i++) {
+    balls[i] = new Ball(random(width), random(height), random(30, 70), i, balls);
+  }
+  noStroke();
+  fill(255, 204);
+}
+
+void drawBalls() {
+  background(0);
+  for (Ball ball : balls) {
+    ball.collide();
+    ball.move();
+    ball.display();  
+  }
+}
+
+class Ball {
+  
+  float x, y;
+  float diameter;
+  float vx = 0;
+  float vy = 0;
+  int id;
+  Ball[] others;
+ 
+  Ball(float xin, float yin, float din, int idin, Ball[] oin) {
+    x = xin;
+    y = yin;
+    diameter = din;
+    id = idin;
+    others = oin;
+  } 
+  
+  void collide() {
+    for (int i = id + 1; i < numBalls; i++) {
+      float dx = others[i].x - x;
+      float dy = others[i].y - y;
+      float distance = sqrt(dx*dx + dy*dy);
+      float minDist = others[i].diameter/2 + diameter/2;
+      if (distance < minDist) { 
+        float angle = atan2(dy, dx);
+        float targetX = x + cos(angle) * minDist;
+        float targetY = y + sin(angle) * minDist;
+        float ax = (targetX - others[i].x) * spring;
+        float ay = (targetY - others[i].y) * spring;
+        vx -= ax;
+        vy -= ay;
+        others[i].vx += ax;
+        others[i].vy += ay;
+      }
+    }   
+  }
+  
+  void move() {
+    vy += gravity;
+    x += vx;
+    y += vy;
+    if (x + diameter/2 > width) {
+      x = width - diameter/2;
+      vx *= friction; 
+    }
+    else if (x - diameter/2 < 0) {
+      x = diameter/2;
+      vx *= friction;
+    }
+    if (y + diameter/2 > height) {
+      y = height - diameter/2;
+      vy *= friction; 
+    } 
+    else if (y - diameter/2 < 0) {
+      y = diameter/2;
+      vy *= friction;
+    }
+  }
+  
+  void display() {
+    ellipse(x, y, diameter, diameter);
+  }
+}
