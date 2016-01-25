@@ -1,4 +1,4 @@
-import processing.video.*;
+//import processing.video.*;
 import processing.serial.*;
 import java.nio.file.*;
 
@@ -46,7 +46,7 @@ Serial serial;
 final byte[] frame = new byte[int(32 * assemblySize.x * assemblySize.y)];
 
 boolean dirty = false;
-Capture video;
+//Capture video;
 
 void setup() {
   //this call cannot use variables, but should be set to simulatorPixelSize * currentFrame.size
@@ -127,12 +127,12 @@ void startWatchingFileSystem(){
   }
 }
 
-void startCamera() {
+/*void startCamera() {
   // Start capturing images from the camera
   video = new Capture(this, int(inputVideoSize.x), int(inputVideoSize.y));
   video.start();
 }
-
+*/
 void draw() {
   if (dirty) {
     drawToSimulator();
@@ -348,11 +348,11 @@ boolean isOn(PImage img, int x, int y){
   return val >= 1;
 }
 
-void captureEvent(Capture c) {
+/*void captureEvent(Capture c) {
   c.read();
   if (!dirty) {
     dirty = true;
     c.loadPixels();
     processImage(c);
   }
-}
+}*/
