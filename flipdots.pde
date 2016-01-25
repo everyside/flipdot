@@ -171,7 +171,7 @@ void clearSimulator() {
 }
 
 void drawToDevice() {
-  //serial.write(frame);
+  serial.write(frame);
   //log(toHex(frame));
 }
 
